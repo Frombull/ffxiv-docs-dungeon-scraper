@@ -130,4 +130,4 @@ dmypy.json
 
 # Test stuff
 html.txt
-#top_secret_keys.json
+top_secret_keys.json
