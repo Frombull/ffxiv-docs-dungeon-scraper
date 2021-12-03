@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Test stuff
+html.txt
+#top_secret_keys.json
