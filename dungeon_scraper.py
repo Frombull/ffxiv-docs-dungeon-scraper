@@ -37,13 +37,15 @@ class DungeonScraper:
 
         for i, item in enumerate(wrapper_1):
             # print(f'{i}, {item}')
-            if 'difficulty' in str(item).strip().lower():
+            if '>difficulty<' in str(item).strip().lower():
                 next_item = str(wrapper_1[i+1])
                 dg_difficulty = self._filterTags(next_item)
-            elif 'level' in str(item).strip().lower():
+            elif '>level<' in str(item).strip().lower():
                 next_item = str(wrapper_1[i + 1])
-                print()
                 dg_level = self._filterTags(next_item)
+            elif '>ilevel<' in str(item).strip().lower():
+                next_item = str(wrapper_1[i + 1])
+                dg_ilevel = self._filterTags(next_item)
 
 
         foo = '-'
@@ -52,6 +54,7 @@ class DungeonScraper:
             "type": foo,
             "expansion": foo,
             "level": dg_level,
+            "ilevel": dg_ilevel,
             "dificulty": dg_difficulty,
             "partySize": foo,
         }
@@ -65,6 +68,17 @@ class DungeonScraper:
     def _filterTags(item: str) -> str:
         # log.info('Filtering item tags')
         return item[1:].split('<')[0].split('>')[1].replace('\xa0', '')
+
+    @staticmethod
+    def _getExpansionFromPatch(patch: str) -> str:  # 2.0
+        patches = {
+            "2": "A Realm Reborn",
+            "3": "Heavensward",
+            "4": "Stormblood",
+            "5": "Shadowbringers",
+            "6": "Endwalker"
+        }
+        return patches[patch.split('.')[0]]
 
 
 if __name__ == '__main__':
