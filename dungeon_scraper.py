@@ -1,5 +1,6 @@
 import json
 import logging as log
+from pprint import pprint
 
 import requests
 from bs4 import BeautifulSoup
@@ -27,33 +28,45 @@ class DungeonScraper:
         dg_name = infobox.find('p', class_='heading').text.strip()
 
         wrappers = infobox.find('div', class_='wrapper')
-
-        # TODO: Finish this stuff lmao
-        # wrapper_1 = list(wrappers.find_all('dl')[0])
+        wrapper_1 = list(wrappers.find_all('dl')[0])
         wrapper_2 = list(wrappers.find_all('dl')[1])
-        # print(wrapper_1[0])
-        # for i in :
-        # print(i.text)
-        # print('-'*30)
-        # dg_level = .find('Level')
 
-        # party_size = infobox.find('', class_='').text.strip()
+        wrapper_1 = list(filter(lambda x: len(str(x)) > 4, wrapper_1))
+        wrapper_2 = list(filter(lambda x: len(str(x)) > 4, wrapper_2))
 
-        # print(dg_level)
 
-        return json.dumps({
+        for i, item in enumerate(wrapper_1):
+            # print(f'{i}, {item}')
+            if 'difficulty' in str(item).strip().lower():
+                next_item = str(wrapper_1[i+1])
+                dg_difficulty = self._filterTags(next_item)
+            elif 'level' in str(item).strip().lower():
+                next_item = str(wrapper_1[i + 1])
+                print()
+                dg_level = self._filterTags(next_item)
+
+
+        foo = '-'
+        return {
             "name": dg_name,
-            "type": url,
-            "expansion": url,
-            "level": url,
-            "partySize": url,
-        })
+            "type": foo,
+            "expansion": foo,
+            "level": dg_level,
+            "dificulty": dg_difficulty,
+            "partySize": foo,
+        }
 
     @staticmethod
     def _filterDgName(dg_name: str) -> str:
-        log.info('Filtering dungeon name')
+        #log.info('Filtering dungeon name')
         return dg_name.strip().replace(' ', '_')
+
+    @staticmethod
+    def _filterTags(item: str) -> str:
+        # log.info('Filtering item tags')
+        return item[1:].split('<')[0].split('>')[1].replace('\xa0', '')
 
 
 if __name__ == '__main__':
-    DungeonScraper().getDungeon('Dun_Scaith')
+    potato = DungeonScraper().getDungeon('The Drowned City of Skalla')
+    pprint(potato)
