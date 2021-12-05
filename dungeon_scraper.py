@@ -35,29 +35,28 @@ class DungeonScraper:
         for wrapper in wrappers:
             for i, item in enumerate(wrapper):
                 if len(str(item)) > 4:
-                    wrapper_final.append(str(item))
+                    wrapper_final.append(str(item).strip().lower())
 
         for i, item in enumerate(wrapper_final):
-            # print(f'{i}, {item}')
-            if '>difficulty<' in item.strip().lower():
-                next_item = wrapper_final[i + 1]
+            next_index = i+1
+            if next_index >= len(wrapper_final):
+                break
+
+            next_item = wrapper_final[next_index]
+            if '>difficulty<' in item:
                 dg_difficulty = self._filterTags(next_item)
-            elif '>level<' in item.strip().lower():
-                next_item = wrapper_final[i + 1]
+            elif '>level<' in item:
                 dg_level = self._filterTags(next_item)
-            elif '>ilevel<' in item.strip().lower():
-                next_item = wrapper_final[i + 1]
+            elif '>ilevel<' in item:
                 dg_ilevel = self._filterTags(next_item)
-            elif '>patch<' in item.strip().lower():
-                next_item = wrapper_final[i + 1]
+            elif '>patch<' in item:
                 dg_patch = next_item.split('</a>')[0].split('">')[1]
                 dg_expansion = self._getExpansionFromPatch(dg_patch)
-            elif '>party size<' in item.strip().lower():
-                next_item = wrapper_final[i + 1]
+            elif '>party size<' in item:
                 if 'Alliance' in next_item:
                     dg_party_size = 'Alliance'
                 else:
-                    dg_party_size = self._filterTags(str(next_item))
+                    dg_party_size = self._filterTags(next_item)
                     dg_party_size = dg_party_size.split('Party')[0] + 'Party'
 
         main_page = soup.find('div', class_='mw-parser-output')
