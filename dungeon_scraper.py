@@ -20,6 +20,7 @@ class DungeonScraper:
     def getDungeon(self, dg_name: str):
         dg_name_filtered = self._filterDgName(dg_name)
         URL = f'https://ffxiv.consolegameswiki.com/wiki/{dg_name_filtered}'
+
         log.info(f'Getting dungeon: {dg_name}, from url: {URL}')
 
         r = requests.get(url=URL, headers=self.HEADERS)
@@ -28,45 +29,39 @@ class DungeonScraper:
         infobox = soup.find('div', class_='infobox-n duty')
         dg_name = infobox.find('p', class_='heading').text.strip()
 
-        # TODO: Deixar essa parada dos wrapper_x automatica, pq as vezes tem uns 4 e as vezes uns 2 ¬¬
-        wrappers = infobox.find('div', class_='wrapper')
+        wrappers = infobox.find('div', class_='wrapper').find_all('dl')
 
-        wrapper_1_raw = list(wrappers.find_all('dl')[0])
-        wrapper_2_raw = list(wrappers.find_all('dl')[1])
-        wrapper_1 = list(filter(lambda x: len(str(x)) > 4, wrapper_1_raw))
-        wrapper_2 = list(filter(lambda x: len(str(x)) > 4, wrapper_2_raw))
+        wrapper_final = []
+        for wrapper in wrappers:
+            for i, item in enumerate(wrapper):
+                if len(str(item)) > 4:
+                    wrapper_final.append(str(item))
 
-        # TODO: Deixar também "automatico", pq as vezes tem uns 4
-        for i, item in enumerate(wrapper_1):
+        for i, item in enumerate(wrapper_final):
             # print(f'{i}, {item}')
-            if '>difficulty<' in str(item).strip().lower():
-                next_item = str(wrapper_1[i + 1])
+            if '>difficulty<' in item.strip().lower():
+                next_item = wrapper_final[i + 1]
                 dg_difficulty = self._filterTags(next_item)
-            elif '>level<' in str(item).strip().lower():
-                next_item = str(wrapper_1[i + 1])
+            elif '>level<' in item.strip().lower():
+                next_item = wrapper_final[i + 1]
                 dg_level = self._filterTags(next_item)
-            elif '>ilevel<' in str(item).strip().lower():
-                next_item = str(wrapper_1[i + 1])
+            elif '>ilevel<' in item.strip().lower():
+                next_item = wrapper_final[i + 1]
                 dg_ilevel = self._filterTags(next_item)
-
-        for i, item in enumerate(wrapper_2):
-            if '>patch<' in str(item).strip().lower():
-                next_item = wrapper_2[i + 1]
-                dg_patch = self._filterTags(str(next_item.text))
+            elif '>patch<' in item.strip().lower():
+                next_item = wrapper_final[i + 1]
+                dg_patch = next_item.split('</a>')[0].split('">')[1]
                 dg_expansion = self._getExpansionFromPatch(dg_patch)
-            elif '>party size<' in str(item).strip().lower():
-                next_item = wrapper_2[i + 1]
+            elif '>party size<' in item.strip().lower():
+                next_item = wrapper_final[i + 1]
                 if 'Alliance' in next_item:
                     dg_party_size = 'Alliance'
                 else:
-                    dg_party_size = self._filterTags(str(next_item.text))
+                    dg_party_size = self._filterTags(str(next_item))
                     dg_party_size = dg_party_size.split('Party')[0] + 'Party'
 
-
-
         main_page = soup.find('div', class_='mw-parser-output')
-        p_list = main_page.find_all('p')
-        for p in p_list:
+        for p in main_page.find_all('p'):
             if 'href="/wiki/Dungeon"' in str(p):
                 dg_type = 'Dungeon'
             elif 'href="/wiki/Trial"' in str(p):
@@ -74,8 +69,7 @@ class DungeonScraper:
             elif 'href="/wiki/Raid"' in str(p):
                 dg_type = 'Raid'
 
-
-        # TODO: Deixar tudo por padrão como 'None' ou sei lá
+        # TODO: Set everything as None by default
         return {
             "name": dg_name,
             "type": dg_type,
@@ -93,7 +87,6 @@ class DungeonScraper:
         log.info(f'Filtering dungeon name: {dg_name}')
         return dg_name.strip().replace(' ', '_').replace("'", '%27').title()
 
-    # TODO: Se pa é melhor remover essa porra toda aqui e pegar o conteudo do objeto bs4 (.text)
     @staticmethod
     def _filterTags(item: str) -> str:
         # log.info('Filtering item tags')
