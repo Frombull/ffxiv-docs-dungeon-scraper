@@ -61,7 +61,6 @@ class DungeonScraper:
                 else:
                     dg_party_size = self._filterTags(str(next_item.text))
                     dg_party_size = dg_party_size.split('Party')[0] + 'Party'
-                    print(f'Party Size: {dg_party_size}')
 
 
 
@@ -86,12 +85,13 @@ class DungeonScraper:
             "ilevel": dg_ilevel,
             "dificulty": dg_difficulty,
             "partySize": dg_party_size,
+            "url": URL
         }
 
     @staticmethod
     def _filterDgName(dg_name: str) -> str:
-        # log.info('Filtering dungeon name')
-        return dg_name.strip().replace(' ', '_').replace("'", '%27')
+        log.info(f'Filtering dungeon name: {dg_name}')
+        return dg_name.strip().replace(' ', '_').replace("'", '%27').title()
 
     # TODO: Se pa é melhor remover essa porra toda aqui e pegar o conteudo do objeto bs4 (.text)
     @staticmethod
@@ -117,5 +117,5 @@ class DungeonScraper:
 
 
 if __name__ == '__main__':
-    dungeon_info = DungeonScraper().getDungeon("The Tower at Paradigm's Breach")
-    #print(json.dumps(dungeon_info, indent=4))
+    dungeon_info = DungeonScraper().getDungeon("AmDapor_KEEp")
+    print(json.dumps(dungeon_info, indent=4))
