@@ -57,7 +57,8 @@ class DungeonScraper:
                     dg_party_size = 'Alliance'
                 else:
                     dg_party_size = self._filterTags(next_item)
-                    dg_party_size = dg_party_size.split('Party')[0] + 'Party'
+                    dg_party_size = (dg_party_size.split('Party')[0] + 'Party').title()
+
 
         main_page = soup.find('div', class_='mw-parser-output')
         for p in main_page.find_all('p'):
@@ -72,10 +73,10 @@ class DungeonScraper:
         return {
             "name": dg_name,
             "type": dg_type,
-            "expansion": dg_expansion,
-            "patch": dg_patch,
             "level": dg_level,
             "ilevel": dg_ilevel,
+            "expansion": dg_expansion,
+            "patch": dg_patch,
             "dificulty": dg_difficulty,
             "partySize": dg_party_size,
             "url": URL
@@ -90,9 +91,9 @@ class DungeonScraper:
     def _filterTags(item: str) -> str:
         # log.info('Filtering item tags')
         try:
-            return item[1:].split('<')[0].split('>')[1].replace('\xa0', '')
+            return item[1:].split('<')[0].split('>')[1].replace('\xa0', '').title()
         except IndexError:
-            return item.replace('\xa0', '')
+            return item.replace('\xa0', '').title()
         except:
             return item
 
@@ -109,5 +110,5 @@ class DungeonScraper:
 
 
 if __name__ == '__main__':
-    dungeon_info = DungeonScraper().getDungeon("AmDapor_KEEp")
+    dungeon_info = DungeonScraper().getDungeon("Amdapor Keep")
     print(json.dumps(dungeon_info, indent=4))
