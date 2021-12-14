@@ -7,11 +7,11 @@ from bs4 import BeautifulSoup
 
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0'}
 
-log.basicConfig(level=log.INFO,
-                format='[%(levelname)s] (%(asctime)s) - %(message)s',
-                datefmt='%H:%M:%S')
+# log.basicConfig(level=log.INFO,
+#                 format='[%(levelname)s] (%(asctime)s) - %(message)s',
+#                 datefmt='%H:%M:%S')
 
-log.info('Stating scraper')
+# log.info('Stating scraper')
 
 
 @dataclass()
@@ -29,12 +29,14 @@ class Dungeons:
     @classmethod
     def get(cls, dg_name: str):
         dg_name_filtered = cls._formatNameToUrl(dg_name)
-        URL = f'https://ffxiv.consolegameswiki.com/wiki/{dg_name_filtered}'
+        URL = f'https://ffxiv.consolegameswiki.com/mediawiki/index.php?search={dg_name_filtered}'
 
-        log.info(f'Getting dungeon: {dg_name}, from url: {URL}')
+        # log.info(f'Getting dungeon: {dg_name}, from url: {URL}')
 
         r = requests.get(url=URL, headers=HEADERS)
         soup = BeautifulSoup(r.content, 'html.parser')
+        if r.status_code == 404:
+            raise NameError(f'Could not find dungeon {dg_name}')
 
         infobox = soup.find('div', class_='infobox-n duty')
         cls.name = infobox.find('p', class_='heading').text.strip()
@@ -67,7 +69,7 @@ class Dungeons:
                     cls.party_size = 'Alliance'
                 else:
                     cls.party_size = cls._filterTags(next_item)
-                    cls.party_size = (cls.party_size.split('Party')[0] + 'Party').title()
+                    cls.party_size = (cls.party_size.split('Party')[0]).title()
 
         main_page = soup.find('div', class_='mw-parser-output')
         for p in main_page.find_all('p'):
@@ -95,8 +97,8 @@ class Dungeons:
 
     @staticmethod
     def _formatNameToUrl(dg_name: str) -> str:
-        log.info(f'Filtering dungeon name: {dg_name}')
-        return dg_name.strip().replace(' ', '_').replace("'", '%27').title()
+        # log.info(f'Filtering dungeon name: {dg_name}')
+        return dg_name.strip().title().replace(' ', '_').replace("'", '%27')
 
     @staticmethod
     def _filterTags(item: str) -> str:
@@ -122,4 +124,6 @@ class Dungeons:
 
 
 if __name__ == '__main__':
-    print(Dungeons.get('Amdapor keep'))
+    print(Dungeons.get('The Drowned City OF Skalla'))
+
+    # TODO: Maybe search using <https://ffxiv.consolegameswiki.com/mediawiki/index.php?search=The+Drowned+City+OF&title=Special%3ASearch&go=Go>
