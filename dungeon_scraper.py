@@ -7,9 +7,9 @@ from bs4 import BeautifulSoup
 
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0'}
 
-# log.basicConfig(level=log.INFO,
-#                 format='[%(levelname)s] (%(asctime)s) - %(message)s',
-#                 datefmt='%H:%M:%S')
+log.basicConfig(level=log.INFO,
+                format='[%(levelname)s] (%(asctime)s) - %(message)s',
+                datefmt='%H:%M:%S')
 
 # log.info('Stating scraper')
 
@@ -27,7 +27,7 @@ class Dungeons:
     url: str = 'N/A'
 
     @classmethod
-    def get(cls, dg_name: str):
+    def get(cls, dg_name: str) -> dict:
         dg_name_filtered = cls._formatNameToUrl(dg_name)
         URL = f'https://ffxiv.consolegameswiki.com/mediawiki/index.php?search={dg_name_filtered}'
 
@@ -83,17 +83,17 @@ class Dungeons:
                 cls.type = 'Raid'
                 break
 
-        return cls(
-            name=cls.name,
-            type=cls.type,
-            level=cls.level,
-            ilevel=cls.ilevel,
-            expansion=cls.expansion,
-            patch=cls.patch,
-            difficulty=cls.difficulty,
-            party_size=cls.party_size,
-            url=URL
-        )
+        return {
+            "name": cls.name,
+            "type": cls.type,
+            "level": cls.level,
+            "ilevel": cls.ilevel,
+            "expansion": cls.expansion,
+            "patch": cls.patch,
+            "difficulty": cls.difficulty,
+            "party_size": cls.party_size,
+            "url": URL
+        }
 
     @staticmethod
     def _formatNameToUrl(dg_name: str) -> str:
@@ -121,9 +121,3 @@ class Dungeons:
 
     def __str__(self):
         return json.dumps(vars(self), indent=2)
-
-
-if __name__ == '__main__':
-    print(Dungeons.get('The Drowned City OF Skalla'))
-
-    # TODO: Maybe search using <https://ffxiv.consolegameswiki.com/mediawiki/index.php?search=The+Drowned+City+OF&title=Special%3ASearch&go=Go>
