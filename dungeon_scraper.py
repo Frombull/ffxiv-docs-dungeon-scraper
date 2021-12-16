@@ -5,13 +5,12 @@ from dataclasses import dataclass
 import requests
 from bs4 import BeautifulSoup
 
+
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0'}
 
 log.basicConfig(level=log.INFO,
                 format='[%(levelname)s] (%(asctime)s) - %(message)s',
                 datefmt='%H:%M:%S')
-
-# log.info('Stating scraper')
 
 
 @dataclass()
@@ -29,17 +28,24 @@ class Dungeons:
     @classmethod
     def get(cls, dg_name: str) -> dict:
         dg_name_filtered = cls._formatNameToUrl(dg_name)
-        URL = f'https://ffxiv.consolegameswiki.com/mediawiki/index.php?search={dg_name_filtered}'
+        URL = f"https://ffxiv.consolegameswiki.com/mediawiki/index.php?search={dg_name_filtered}"
 
-        # log.info(f'Getting dungeon: {dg_name}, from url: {URL}')
+        log.info(f'Getting dungeon: {dg_name}, from url: {URL}')
 
         r = requests.get(url=URL, headers=HEADERS)
         soup = BeautifulSoup(r.content, 'html.parser')
         if r.status_code == 404:
-            raise NameError(f'Could not find dungeon {dg_name}')
+            log.error(f'HTTP {r.status_code}, Could not find dungeon: {dg_name}')
+            raise NameError(f'HTTP {r.status_code}, Could not find dungeon: {dg_name}')
 
-        infobox = soup.find('div', class_='infobox-n duty')
-        cls.name = infobox.find('p', class_='heading').text.strip()
+        # Check if the page is a dungeon page
+        try:
+            infobox = soup.find('div', class_='infobox-n duty')
+            cls.name = infobox.find('p', class_='heading').text.strip()
+        except AttributeError:
+            log.error(f'Could not find dungeon: {dg_name}')
+            return None
+            # raise NameError(f'Could not find dungeon: {dg_name}')
 
         wrappers = infobox.find('div', class_='wrapper').find_all('dl')
 
@@ -97,7 +103,6 @@ class Dungeons:
 
     @staticmethod
     def _formatNameToUrl(dg_name: str) -> str:
-        # log.info(f'Filtering dungeon name: {dg_name}')
         return dg_name.strip().title().replace(' ', '_').replace("'", '%27')
 
     @staticmethod
@@ -110,14 +115,13 @@ class Dungeons:
     @staticmethod
     def _getExpansionFromPatch(patch: str) -> str:
         patch_first_num = str(patch.split('.')[0])
-        patches = {
+        return {
             "2": "A Realm Reborn",
             "3": "Heavensward",
             "4": "Stormblood",
             "5": "Shadowbringers",
             "6": "Endwalker"
-        }
-        return patches.get(patch_first_num, 'N/A')
+        }.get(patch_first_num, 'N/A')
 
     def __str__(self):
         return json.dumps(vars(self), indent=2)
