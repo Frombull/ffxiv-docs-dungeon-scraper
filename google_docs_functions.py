@@ -40,9 +40,13 @@ def get_first_row(*, id: str):
     sheet = service.spreadsheets()
     result = sheet.values().get(spreadsheetId=id,
                                 range='A1:I1').execute()
-    first_row_values = result.get('values', [])
+    first_row = result.get('values', [])[0]
 
-    return first_row_values if first_row_values else log.error('No data found in first row')
+    if first_row:
+        first_row = list(map(str.lower, first_row))
+        return first_row
+    else:
+        log.error('No data found in first row')
 
 
 def make_first_row_map(row: list) -> dict:
@@ -51,7 +55,7 @@ def make_first_row_map(row: list) -> dict:
     for i, item in enumerate(row):
         item = str(item).lower()
         if item in ('dungeon', 'dungeons', 'name', 'names'):
-            columns_map.update({'name': letters[i]})
+            columns_map.update({'dungeon': letters[i]})
         elif item in ('type', 'types'):
             columns_map.update({'type': letters[i]})
         elif item in ('level', 'levels', 'lvl'):
@@ -69,15 +73,4 @@ def make_first_row_map(row: list) -> dict:
         elif item in ('url', 'link', 'wiki'):
             columns_map.update({'url': letters[i]})
 
-    print(f'First row map: {columns_map}')
     return columns_map
-
-# write_body = [['item_1', 'right_item_1'],
-#               ['item_2', 'right_item_1'],
-#               ['item_3'],
-#               [None, 'right_none'],
-#               ['item_5']]
-#
-# writeInDocs(id='1iAC6O-_9YSG47CYiTWTvMNL4Li-EaEjuNUZOHgkS4lI',
-#             range='B2:G20',
-#             write_body=write_body)
