@@ -10,6 +10,7 @@ log.basicConfig(level=log.INFO,
                 format='[%(levelname)s] (%(asctime)s) - %(message)s',
                 datefmt='%H:%M:%S')
 
+#TODO: Cortar o 'doc_id' de uma url compelta de uma tabela
 DOC_ID = '1iAC6O-_9YSG47CYiTWTvMNL4Li-EaEjuNUZOHgkS4lI'
 
 
@@ -18,9 +19,11 @@ def main():
     first_row_map = make_first_row_map(first_row)
     #TODO: first row só que com os nome bunitinho pra ja pegar do json
 
+    # TODO: Formatar o first row range bunitinho com uma função ou sla
     dungeons_read = readFromDocs(id=DOC_ID,
                                  range=f'{first_row_map["dungeon"]}1:{first_row_map["dungeon"]}100')
 
+    # TODO: Jogar isso p uma função e dar um nome bacana
     dungeons_json = {}
     for i, dungeon_row in enumerate(dungeons_read, 1):
         dungeon_name = str(dungeon_row[0])
@@ -40,6 +43,7 @@ def main():
         write_body.append(row)
         row = []
 
+    #TODO: Pegar o range necessario e usar uma função p formatar
     writeInDocs(id=DOC_ID,
                 range='A1:I12',
                 write_body=write_body)
