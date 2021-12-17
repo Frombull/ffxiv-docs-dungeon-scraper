@@ -15,7 +15,7 @@ log.basicConfig(level=log.INFO,
 
 @dataclass()
 class Dungeons:
-    name: str = 'N/A'
+    dungeon: str = 'N/A'
     type: str = 'N/A'
     level: str = 'N/A'
     ilevel: str = 'N/A'
@@ -41,7 +41,7 @@ class Dungeons:
         # Check if the page is a dungeon page
         try:
             infobox = soup.find('div', class_='infobox-n duty')
-            cls.name = infobox.find('p', class_='heading').text.strip()
+            cls.dungeon = infobox.find('p', class_='heading').text.strip()
         except AttributeError:
             log.error(f'Could not find dungeon: {dg_name}')
             return None
@@ -90,7 +90,7 @@ class Dungeons:
                 break
 
         return {
-            "name": cls.name,
+            "dungeon": cls.dungeon,
             "type": cls.type,
             "level": cls.level,
             "ilevel": cls.ilevel,
